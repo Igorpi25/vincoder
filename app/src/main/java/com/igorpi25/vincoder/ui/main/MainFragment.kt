@@ -3,17 +3,15 @@ package com.igorpi25.vincoder.ui.main
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.igorpi25.vincoder.R
 import com.igorpi25.vincoder.interfaces.RetrofitServices
-import com.igorpi25.vincoder.adapters.MyMovieAdapter
+import com.igorpi25.vincoder.adapters.ManufacturersListAdapter
 import com.igorpi25.vincoder.common.Common
 import com.igorpi25.vincoder.databinding.MainFragmentBinding
-import com.igorpi25.vincoder.model.Movie
+import com.igorpi25.vincoder.model.Manufacturer
+import com.igorpi25.vincoder.retrofit.ServerResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -29,8 +27,7 @@ class MainFragment : Fragment(R.layout.main_fragment) {
     private lateinit var viewModel: MainViewModel
     lateinit var mService: RetrofitServices
     lateinit var layoutManager: LinearLayoutManager
-    lateinit var adapter: MyMovieAdapter
-    //lateinit var dialog: AlertDialog
+    lateinit var adapter: ManufacturersListAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -45,7 +42,7 @@ class MainFragment : Fragment(R.layout.main_fragment) {
 
         mService = Common.retrofitService
 
-        getAllMovieList()
+        getAllManufacturers()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -60,19 +57,16 @@ class MainFragment : Fragment(R.layout.main_fragment) {
         super.onDestroyView()
     }
 
-    private fun getAllMovieList() {
-        //dialog.show()
-        mService.getMovieList().enqueue(object : Callback<MutableList<Movie>> {
-            override fun onFailure(call: Call<MutableList<Movie>>, t: Throwable) {
+    private fun getAllManufacturers() {
+        mService.getAllManufacturers(page = 2).enqueue(object : Callback<ServerResponse<Manufacturer>> {
+            override fun onFailure(call: Call<ServerResponse<Manufacturer>>, t: Throwable) {
 
             }
 
-            override fun onResponse(call: Call<MutableList<Movie>>, response: Response<MutableList<Movie>>) {
-                adapter = MyMovieAdapter(context!!, response.body() as MutableList<Movie>)
+            override fun onResponse(call: Call<ServerResponse<Manufacturer>>, response: Response<ServerResponse<Manufacturer>>) {
+                adapter = ManufacturersListAdapter(context!!, ((response.body() as ServerResponse<Manufacturer>).results as MutableList<Manufacturer>?)!! )
                 adapter.notifyDataSetChanged()
                 mainFragmentBinding!!.recyclerMovieList.adapter = adapter
-
-                //dialog.dismiss()
             }
         })
     }

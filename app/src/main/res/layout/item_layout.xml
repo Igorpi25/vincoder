@@ -9,29 +9,15 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="167dp">
+        android:layout_height="wrap_content"
+        android:maxHeight="150dp"
+        android:padding="16dp">
 
-
-        <ImageView
-            android:id="@+id/image_movie"
-            android:layout_width="0dp"
-            android:layout_height="100dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/txt_name"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.238" />
 
         <TextView
-            android:id="@+id/txt_name"
+            android:id="@+id/manufacturer_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="192dp"
-            android:layout_marginLeft="192dp"
-            android:layout_marginTop="16dp"
             android:text="name"
             android:textColor="@android:color/black"
             android:textSize="20sp"
@@ -40,31 +26,28 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/txt_team"
+            android:id="@+id/manufacturer_country"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="196dp"
-            android:layout_marginLeft="196dp"
             android:layout_marginTop="8dp"
-            android:text="team"
+            android:text="country"
             android:textColor="@android:color/black"
             android:textSize="16sp"
             android:textStyle="normal"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/txt_name" />
+            app:layout_constraintTop_toBottomOf="@+id/manufacturer_name" />
 
         <TextView
-            android:id="@+id/txt_createdby"
+            android:id="@+id/manufacturer_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="184dp"
-            android:layout_marginTop="12dp"
-            android:text="createdby"
+            android:layout_marginTop="8dp"
+            android:text="id"
             android:textColor="@android:color/black"
             android:textSize="18sp"
-            android:textStyle="italic"
+            android:textStyle="normal"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/txt_team" />
+            app:layout_constraintTop_toBottomOf="@+id/manufacturer_country" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
