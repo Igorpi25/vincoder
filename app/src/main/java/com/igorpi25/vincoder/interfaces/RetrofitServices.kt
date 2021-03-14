@@ -10,5 +10,5 @@ interface RetrofitServices {
     fun getAllManufacturers(@Query("format") format: String = "json", @Query("page") page: Int): Call<ServerResponse<Manufacturer>>
 
     @GET("vehicles/getmanufacturerdetails/{id}")
-    fun getManufacturerDetails(@Query("format") format: String = "json", @Path("id") id: Int): Call<ServerResponse<Manufacturer>>
+    fun getManufacturerDetails(@Path("id") id: Int, @Query("format") format: String = "json"): Call<ServerResponse<Manufacturer>>
 }

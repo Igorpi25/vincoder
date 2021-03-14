@@ -2,6 +2,7 @@ package com.igorpi25.vincoder.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
@@ -9,23 +10,25 @@ import androidx.recyclerview.widget.RecyclerView
 import com.igorpi25.vincoder.model.Manufacturer
 import com.igorpi25.vincoder.databinding.ItemLayoutBinding
 
-class ManufacturersListAdapter(private val context: Context, private val manufacturerList: MutableList<Manufacturer>):RecyclerView.Adapter<ManufacturersListAdapter.MyViewHolder>() {
+class ManufacturersListAdapter(private val context: Context, private val manufacturerList: MutableList<Manufacturer>, private val listener: (id: Int?)->Unit):RecyclerView.Adapter<ManufacturersListAdapter.MyViewHolder>() {
 
-    class MyViewHolder(binding: ItemLayoutBinding): RecyclerView.ViewHolder(binding.root){
+    class MyViewHolder(binding: ItemLayoutBinding, val listener: (id: Int?)->Unit): RecyclerView.ViewHolder(binding.root){
         val manufacturerName: TextView = binding.manufacturerName
         val manufacturerCountry: TextView = binding.manufacturerCountry
         val manufacturerId: TextView = binding.manufacturerId
 
         fun bind(listItem: Manufacturer) {
+
             itemView.setOnClickListener {
                 Toast.makeText(it.context, "нажал на ${manufacturerName.text}", Toast.LENGTH_SHORT).show()
+                listener(listItem.id)
             }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val binding = ItemLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return MyViewHolder(binding)
+        return MyViewHolder(binding, listener)
     }
 
     override fun getItemCount() = manufacturerList.size

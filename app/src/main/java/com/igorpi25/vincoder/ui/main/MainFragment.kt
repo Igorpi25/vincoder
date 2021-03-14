@@ -12,6 +12,7 @@ import com.igorpi25.vincoder.common.Common
 import com.igorpi25.vincoder.databinding.MainFragmentBinding
 import com.igorpi25.vincoder.model.Manufacturer
 import com.igorpi25.vincoder.retrofit.ServerResponse
+import com.igorpi25.vincoder.ui.details.DetailsFragment
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -34,11 +35,9 @@ class MainFragment : Fragment(R.layout.main_fragment) {
         val binding = MainFragmentBinding.bind(view)
         mainFragmentBinding = binding
 
-
         binding.recyclerMovieList.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(context)
         binding.recyclerMovieList.layoutManager = layoutManager
-
 
         mService = Common.retrofitService
 
@@ -64,7 +63,15 @@ class MainFragment : Fragment(R.layout.main_fragment) {
             }
 
             override fun onResponse(call: Call<ServerResponse<Manufacturer>>, response: Response<ServerResponse<Manufacturer>>) {
-                adapter = ManufacturersListAdapter(context!!, ((response.body() as ServerResponse<Manufacturer>).results as MutableList<Manufacturer>?)!! )
+                adapter = ManufacturersListAdapter(
+                    context = context!!,
+                    manufacturerList = ((response.body() as ServerResponse<Manufacturer>).results as MutableList<Manufacturer>?)!!
+                ) {
+                    fragmentManager!!.beginTransaction()
+                        .replace(R.id.container, DetailsFragment.newInstance(it!!))
+                        .addToBackStack(null)
+                        .commit()
+                }
                 adapter.notifyDataSetChanged()
                 mainFragmentBinding!!.recyclerMovieList.adapter = adapter
             }
