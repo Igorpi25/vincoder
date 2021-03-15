@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.igorpi25.vincoder.R
 import com.igorpi25.vincoder.interfaces.RetrofitServices
@@ -67,10 +68,10 @@ class MainFragment : Fragment(R.layout.main_fragment) {
                     context = context!!,
                     manufacturerList = ((response.body() as ServerResponse<Manufacturer>).results as MutableList<Manufacturer>?)!!
                 ) {
-                    fragmentManager!!.beginTransaction()
-                        .replace(R.id.container, DetailsFragment.newInstance(it!!))
-                        .addToBackStack(null)
-                        .commit()
+
+                    val action = MainFragmentDirections.actionMainToDetails(it!!)
+                    findNavController().navigate(action)
+
                 }
                 adapter.notifyDataSetChanged()
                 mainFragmentBinding!!.recyclerMovieList.adapter = adapter

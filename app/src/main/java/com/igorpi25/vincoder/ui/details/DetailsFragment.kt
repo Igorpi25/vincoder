@@ -3,6 +3,7 @@ package com.igorpi25.vincoder.ui.details
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.igorpi25.vincoder.R
 import com.igorpi25.vincoder.adapters.ManufacturersListAdapter
@@ -15,10 +16,13 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class DetailsFragment(val manufacturerId:Int) : Fragment(R.layout.details_fragment) {
+class DetailsFragment() : Fragment(R.layout.details_fragment) {
     companion object {
-        fun newInstance(manufacturerId: Int) = DetailsFragment(manufacturerId)
+        fun newInstance() = DetailsFragment()
     }
+
+    val args: DetailsFragmentArgs by navArgs()
+
     private var detailsFragmentBinding: DetailsFragmentBinding? = null
 
     lateinit var mService: RetrofitServices
@@ -30,7 +34,7 @@ class DetailsFragment(val manufacturerId:Int) : Fragment(R.layout.details_fragme
         val binding = DetailsFragmentBinding.bind(view)
         detailsFragmentBinding = binding
 
-        binding.manufacturerId.text = manufacturerId.toString()
+        binding.manufacturerId.text = args.manufacturerId.toString()
 
         mService = Common.retrofitService
 
@@ -44,7 +48,7 @@ class DetailsFragment(val manufacturerId:Int) : Fragment(R.layout.details_fragme
     }
 
     private fun getManufacturerDetails() {
-        mService.getManufacturerDetails(id = manufacturerId).enqueue(object :
+        mService.getManufacturerDetails(id = args.manufacturerId).enqueue(object :
             Callback<ServerResponse<Manufacturer>> {
             override fun onFailure(call: Call<ServerResponse<Manufacturer>>, t: Throwable) {
 
