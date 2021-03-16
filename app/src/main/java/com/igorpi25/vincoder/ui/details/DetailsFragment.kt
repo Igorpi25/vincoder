@@ -3,18 +3,23 @@ package com.igorpi25.vincoder.ui.details
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.igorpi25.vincoder.App
 import com.igorpi25.vincoder.R
 import com.igorpi25.vincoder.adapters.ManufacturersListAdapter
 import com.igorpi25.vincoder.common.Common
 import com.igorpi25.vincoder.databinding.DetailsFragmentBinding
+import com.igorpi25.vincoder.db.AppDatabase
 import com.igorpi25.vincoder.interfaces.RetrofitServices
 import com.igorpi25.vincoder.model.Manufacturer
 import com.igorpi25.vincoder.retrofit.ServerResponse
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+
 
 class DetailsFragment() : Fragment(R.layout.details_fragment) {
     companion object {
@@ -29,6 +34,8 @@ class DetailsFragment() : Fragment(R.layout.details_fragment) {
     lateinit var layoutManager: LinearLayoutManager
     lateinit var adapter: ManufacturersListAdapter
 
+    var db: AppDatabase? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val binding = DetailsFragmentBinding.bind(view)
@@ -39,6 +46,21 @@ class DetailsFragment() : Fragment(R.layout.details_fragment) {
         mService = Common.retrofitService
 
         getManufacturerDetails()
+
+        db = App.getInstance()!!.getDatabase()
+
+        binding.buttonSave.setOnClickListener {
+            lifecycleScope.launch {
+                val manufacturerDao = db!!.manufacturerDao()
+                manufacturerDao.insertAll(
+                    com.igorpi25.vincoder.db.entity.Manufacturer(
+                        args.manufacturerId,
+                        binding.manufacturerName.text.toString(),
+                        binding.manufacturerCountry.text.toString()
+                    )
+                )
+            }
+        }
     }
 
     override fun onDestroyView() {
