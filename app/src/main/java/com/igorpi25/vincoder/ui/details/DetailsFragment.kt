@@ -19,9 +19,11 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import toothpick.Toothpick
+import javax.inject.Inject
 
 
-class DetailsFragment() : Fragment(R.layout.details_fragment) {
+class DetailsFragment : Fragment(R.layout.details_fragment) {
     companion object {
         fun newInstance() = DetailsFragment()
     }
@@ -34,10 +36,15 @@ class DetailsFragment() : Fragment(R.layout.details_fragment) {
     lateinit var layoutManager: LinearLayoutManager
     lateinit var adapter: ManufacturersListAdapter
 
-    var db: AppDatabase? = null
+    @Inject
+    lateinit var db: AppDatabase
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val scope = Toothpick.openScopes("AppScope","ViewModelScope")
+        Toothpick.inject(this, scope);
+
         val binding = DetailsFragmentBinding.bind(view)
         detailsFragmentBinding = binding
 
@@ -47,11 +54,9 @@ class DetailsFragment() : Fragment(R.layout.details_fragment) {
 
         getManufacturerDetails()
 
-        db = App.getInstance()!!.getDatabase()
-
         binding.buttonSave.setOnClickListener {
             lifecycleScope.launch {
-                val manufacturerDao = db!!.manufacturerDao()
+                val manufacturerDao = db.manufacturerDao()
                 manufacturerDao.insertAll(
                     com.igorpi25.vincoder.db.entity.Manufacturer(
                         args.manufacturerId,
