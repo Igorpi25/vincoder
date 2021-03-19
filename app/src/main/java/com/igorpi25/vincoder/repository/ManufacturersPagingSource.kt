@@ -22,7 +22,7 @@ class ManufacturersPagingSource(
                 retrofitService.getAllManufacturers(page = nextPageNumber).await()
 
             return LoadResult.Page(
-                data = response.results!!,
+                data = response.results!!.map {it.apply { page = nextPageNumber }},
                 prevKey = null, // Only paging forward.
                 nextKey = nextPageNumber + 1
             )

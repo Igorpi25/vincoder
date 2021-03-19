@@ -32,8 +32,8 @@ class MainViewModel : ViewModel() {
         it.insertSeparators<UiModel.ManufacturerItem, UiModel> { before, after ->
             if(after == null || before == null) {
                 null
-            } else if ( before.manufacturer.id!! < 1000 && after.manufacturer.id!! >= 1000) {
-                UiModel.SeparatorItem (2)
+            } else if ( before.manufacturer.page != after.manufacturer.page) {
+                UiModel.SeparatorItem (after.manufacturer.page?:0)
             } else {
                 null
             }

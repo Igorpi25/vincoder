@@ -8,5 +8,6 @@ data class Manufacturer(
     @SerializedName("Mfr_Name")
     var name: String? = null,
     @SerializedName("Country")
-    var country: String? = null
+    var country: String? = null,
+    var page: Int? = null
 )
