@@ -7,22 +7,45 @@ import android.widget.Toast
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.igorpi25.vincoder.retrofit.model.Manufacturer
+import com.igorpi25.vincoder.R
 import com.igorpi25.vincoder.databinding.ItemLayoutBinding
+import com.igorpi25.vincoder.databinding.ItemSeparatorLayoutBinding
 
 class ManufacturersPagingAdapter(
-    diffCallback: DiffUtil.ItemCallback<Manufacturer>,
+    diffCallback: DiffUtil.ItemCallback<UiModel>,
     private val listener: (id: Int?)->Unit
-) : PagingDataAdapter<Manufacturer, ManufacturersPagingAdapter.MyViewHolder>(diffCallback) {
+) : PagingDataAdapter<UiModel, RecyclerView.ViewHolder>(diffCallback) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val binding = ItemLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return MyViewHolder(binding, listener)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            R.layout.item_layout -> {
+                MyViewHolder(ItemLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false), listener)
+            }
+            else -> {
+                SeparatorViewHolder(ItemSeparatorLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+            }
+        }
     }
 
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val listItem = getItem(position)
-        holder.bind(listItem!!)
+
+        when (listItem) {
+            is UiModel.ManufacturerItem -> {
+                (holder as MyViewHolder).bind(listItem as UiModel.ManufacturerItem)
+            }
+            is UiModel.SeparatorItem -> {
+                (holder as SeparatorViewHolder).bind(listItem as UiModel.SeparatorItem)
+            }
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when(getItem(position)){
+            is UiModel.ManufacturerItem -> R.layout.item_layout
+            is UiModel.SeparatorItem -> R.layout.item_separator_layout
+            null -> throw UnsupportedOperationException("Unknown view")
+        }
     }
 
     class MyViewHolder(binding: ItemLayoutBinding, val listener: (id: Int?)->Unit): RecyclerView.ViewHolder(binding.root){
@@ -30,15 +53,22 @@ class ManufacturersPagingAdapter(
         val manufacturerCountry: TextView = binding.manufacturerCountry
         val manufacturerId: TextView = binding.manufacturerId
 
-        fun bind(listItem: Manufacturer) {
-
-            manufacturerName.text = listItem.name
-            manufacturerCountry.text = listItem.country
-            manufacturerId.text = listItem.id.toString()
+        fun bind(listItem: UiModel.ManufacturerItem) {
+            manufacturerName.text = listItem.manufacturer.name
+            manufacturerCountry.text = listItem.manufacturer.country
+            manufacturerId.text = listItem.manufacturer.id.toString()
 
             itemView.setOnClickListener {
-                listener(listItem.id)
+                listener(listItem.manufacturer.id)
             }
+        }
+    }
+
+    class SeparatorViewHolder(binding: ItemSeparatorLayoutBinding): RecyclerView.ViewHolder(binding.root) {
+        val text: TextView = binding.text
+
+        fun bind(listItem: UiModel.SeparatorItem) {
+            text.text = listItem.page.toString()
         }
     }
 
