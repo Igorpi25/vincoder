@@ -1,16 +1,19 @@
-package com.igorpi25.vincoder.adapters
+package com.igorpi25.vincoder.ui.main
 
-import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.igorpi25.vincoder.model.Manufacturer
+import com.igorpi25.vincoder.retrofit.model.Manufacturer
 import com.igorpi25.vincoder.databinding.ItemLayoutBinding
 
-class ManufacturersListAdapter(private val context: Context, private val manufacturerList: MutableList<Manufacturer>, private val listener: (id: Int?)->Unit):RecyclerView.Adapter<ManufacturersListAdapter.MyViewHolder>() {
+class ManufacturersPagingAdapter(
+    diffCallback: DiffUtil.ItemCallback<Manufacturer>,
+    private val listener: (id: Int?)->Unit
+) : PagingDataAdapter<Manufacturer, ManufacturersPagingAdapter.MyViewHolder>(diffCallback) {
 
     class MyViewHolder(binding: ItemLayoutBinding, val listener: (id: Int?)->Unit): RecyclerView.ViewHolder(binding.root){
         val manufacturerName: TextView = binding.manufacturerName
@@ -28,18 +31,21 @@ class ManufacturersListAdapter(private val context: Context, private val manufac
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val binding = ItemLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return MyViewHolder(binding, listener)
+        return MyViewHolder(
+            binding,
+            listener
+        )
     }
-
-    override fun getItemCount() = manufacturerList.size
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        val listItem = manufacturerList[position]
-        holder.bind(listItem)
+        val listItem = getItem(position)
+        holder.bind(listItem!!)
 
-        holder.manufacturerName.text = manufacturerList[position].name
-        holder.manufacturerCountry.text = manufacturerList[position].country
-        holder.manufacturerId.text = manufacturerList[position].id.toString()
+        holder.manufacturerName.text = listItem.name
+        holder.manufacturerCountry.text = listItem.country
+        holder.manufacturerId.text = listItem.id.toString()
     }
+
+
 
 }

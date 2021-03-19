@@ -1,4 +1,4 @@
-package com.igorpi25.vincoder.model
+package com.igorpi25.vincoder.retrofit.model
 
 import com.google.gson.annotations.SerializedName
 

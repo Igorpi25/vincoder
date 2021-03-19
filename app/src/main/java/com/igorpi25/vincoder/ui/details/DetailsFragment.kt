@@ -5,16 +5,12 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.igorpi25.vincoder.App
 import com.igorpi25.vincoder.R
-import com.igorpi25.vincoder.adapters.ManufacturersListAdapter
-import com.igorpi25.vincoder.common.Common
 import com.igorpi25.vincoder.databinding.DetailsFragmentBinding
 import com.igorpi25.vincoder.db.AppDatabase
-import com.igorpi25.vincoder.interfaces.RetrofitServices
-import com.igorpi25.vincoder.model.Manufacturer
-import com.igorpi25.vincoder.retrofit.ServerResponse
+import com.igorpi25.vincoder.retrofit.RetrofitService
+import com.igorpi25.vincoder.retrofit.model.Manufacturer
+import com.igorpi25.vincoder.retrofit.model.ServerResponse
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -24,17 +20,13 @@ import javax.inject.Inject
 
 
 class DetailsFragment : Fragment(R.layout.details_fragment) {
-    companion object {
-        fun newInstance() = DetailsFragment()
-    }
 
     val args: DetailsFragmentArgs by navArgs()
 
     private var detailsFragmentBinding: DetailsFragmentBinding? = null
 
-    lateinit var mService: RetrofitServices
-    lateinit var layoutManager: LinearLayoutManager
-    lateinit var adapter: ManufacturersListAdapter
+    @Inject
+    lateinit var mService: RetrofitService
 
     @Inject
     lateinit var db: AppDatabase
@@ -42,15 +34,13 @@ class DetailsFragment : Fragment(R.layout.details_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val scope = Toothpick.openScopes("AppScope","ViewModelScope")
-        Toothpick.inject(this, scope);
+        val scope = Toothpick.openScopes("AppScope")
+        Toothpick.inject(this, scope)
 
         val binding = DetailsFragmentBinding.bind(view)
         detailsFragmentBinding = binding
 
         binding.manufacturerId.text = args.manufacturerId.toString()
-
-        mService = Common.retrofitService
 
         getManufacturerDetails()
 
