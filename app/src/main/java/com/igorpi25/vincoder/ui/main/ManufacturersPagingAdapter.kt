@@ -15,6 +15,16 @@ class ManufacturersPagingAdapter(
     private val listener: (id: Int?)->Unit
 ) : PagingDataAdapter<Manufacturer, ManufacturersPagingAdapter.MyViewHolder>(diffCallback) {
 
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
+        val binding = ItemLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return MyViewHolder(binding, listener)
+    }
+
+    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        val listItem = getItem(position)
+        holder.bind(listItem!!)
+    }
+
     class MyViewHolder(binding: ItemLayoutBinding, val listener: (id: Int?)->Unit): RecyclerView.ViewHolder(binding.root){
         val manufacturerName: TextView = binding.manufacturerName
         val manufacturerCountry: TextView = binding.manufacturerCountry
@@ -22,30 +32,14 @@ class ManufacturersPagingAdapter(
 
         fun bind(listItem: Manufacturer) {
 
+            manufacturerName.text = listItem.name
+            manufacturerCountry.text = listItem.country
+            manufacturerId.text = listItem.id.toString()
+
             itemView.setOnClickListener {
-                Toast.makeText(it.context, "нажал на ${manufacturerName.text}", Toast.LENGTH_SHORT).show()
                 listener(listItem.id)
             }
         }
     }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val binding = ItemLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return MyViewHolder(
-            binding,
-            listener
-        )
-    }
-
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        val listItem = getItem(position)
-        holder.bind(listItem!!)
-
-        holder.manufacturerName.text = listItem.name
-        holder.manufacturerCountry.text = listItem.country
-        holder.manufacturerId.text = listItem.id.toString()
-    }
-
-
 
 }

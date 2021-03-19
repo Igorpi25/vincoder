@@ -38,7 +38,9 @@ class MainFragment : Fragment(R.layout.main_fragment) {
             findNavController().navigate(action)
         }
 
-        binding.recyclerMovieList.adapter = adapter
+        binding.recyclerMovieList.adapter = adapter.withLoadStateFooter(
+            footer = ManufacturerLoadStateAdapter { adapter.retry() }
+        )
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
