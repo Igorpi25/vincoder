@@ -1,7 +1,7 @@
 package com.igorpi25.vincoder.retrofit
 
-import com.igorpi25.vincoder.retrofit.model.Manufacturer
-import com.igorpi25.vincoder.retrofit.model.ServerResponse
+import com.igorpi25.vincoder.model.Manufacturer
+import com.igorpi25.vincoder.model.ServerResponse
 import retrofit2.Call
 import retrofit2.http.*
 

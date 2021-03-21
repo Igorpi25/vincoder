@@ -3,12 +3,12 @@ package com.igorpi25.vincoder.repository
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.igorpi25.vincoder.retrofit.RetrofitService
-import com.igorpi25.vincoder.retrofit.model.Manufacturer
+import com.igorpi25.vincoder.model.Manufacturer
 import retrofit2.HttpException
 import retrofit2.await
 import java.io.IOException
 
-class ManufacturersPagingSource(
+class ManufacturersRetrofitPagingSource(
     val retrofitService: RetrofitService
 ) : PagingSource<Int, Manufacturer>() {
     override suspend fun load(

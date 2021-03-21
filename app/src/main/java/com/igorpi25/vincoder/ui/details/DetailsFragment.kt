@@ -9,8 +9,8 @@ import com.igorpi25.vincoder.R
 import com.igorpi25.vincoder.databinding.DetailsFragmentBinding
 import com.igorpi25.vincoder.db.AppDatabase
 import com.igorpi25.vincoder.retrofit.RetrofitService
-import com.igorpi25.vincoder.retrofit.model.Manufacturer
-import com.igorpi25.vincoder.retrofit.model.ServerResponse
+import com.igorpi25.vincoder.model.Manufacturer
+import com.igorpi25.vincoder.model.ServerResponse
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -48,7 +48,7 @@ class DetailsFragment : Fragment(R.layout.details_fragment) {
             lifecycleScope.launch {
                 val manufacturerDao = db.manufacturerDao()
                 manufacturerDao.insertAll(
-                    com.igorpi25.vincoder.db.entity.Manufacturer(
+                    Manufacturer(
                         args.manufacturerId,
                         binding.manufacturerName.text.toString(),
                         binding.manufacturerCountry.text.toString()

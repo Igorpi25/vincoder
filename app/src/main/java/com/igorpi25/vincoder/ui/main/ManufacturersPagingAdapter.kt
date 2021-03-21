@@ -32,10 +32,10 @@ class ManufacturersPagingAdapter(
 
         when (listItem) {
             is UiModel.ManufacturerItem -> {
-                (holder as MyViewHolder).bind(listItem as UiModel.ManufacturerItem)
+                (holder as MyViewHolder).bind(listItem)
             }
             is UiModel.SeparatorItem -> {
-                (holder as SeparatorViewHolder).bind(listItem as UiModel.SeparatorItem)
+                (holder as SeparatorViewHolder).bind(listItem)
             }
         }
     }
@@ -44,7 +44,7 @@ class ManufacturersPagingAdapter(
         return when(getItem(position)){
             is UiModel.ManufacturerItem -> R.layout.item_layout
             is UiModel.SeparatorItem -> R.layout.item_separator_layout
-            null -> throw UnsupportedOperationException("Unknown view")
+            null -> throw UnsupportedOperationException("Unknown view position="+position)
         }
     }
 

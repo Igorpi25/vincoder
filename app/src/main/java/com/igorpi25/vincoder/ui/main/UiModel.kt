@@ -1,6 +1,6 @@
 package com.igorpi25.vincoder.ui.main
 
-import com.igorpi25.vincoder.retrofit.model.Manufacturer
+import com.igorpi25.vincoder.model.Manufacturer
 
 sealed class UiModel {
     data class ManufacturerItem(val manufacturer: Manufacturer): UiModel()
