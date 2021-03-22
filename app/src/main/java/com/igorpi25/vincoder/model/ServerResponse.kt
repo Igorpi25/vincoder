@@ -1,12 +1,14 @@
 package com.igorpi25.vincoder.model
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 
 data class ServerResponse<T> (
-    @SerializedName("Count")
-    var count: Int? = null,
-    @SerializedName("Message")
-    var message: String? = null,
-    @SerializedName("Results")
-    var results: List<T>? = null
+    @field:Json(name = "Count")
+    val count: Int,
+
+    @field:Json(name = "Message")
+    val message: String,
+
+    @field:Json(name = "Results")
+    val results: List<T>
 )

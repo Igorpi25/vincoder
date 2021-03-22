@@ -51,7 +51,8 @@ class DetailsFragment : Fragment(R.layout.details_fragment) {
                     Manufacturer(
                         args.manufacturerId,
                         binding.manufacturerName.text.toString(),
-                        binding.manufacturerCountry.text.toString()
+                        binding.manufacturerCountry.text.toString(),
+                        0
                     )
                 )
             }
@@ -72,8 +73,8 @@ class DetailsFragment : Fragment(R.layout.details_fragment) {
             }
 
             override fun onResponse(call: Call<ServerResponse<Manufacturer>>, response: Response<ServerResponse<Manufacturer>>) {
-                detailsFragmentBinding!!.manufacturerName.text  = (response.body() as ServerResponse<Manufacturer>).results!![0].name
-                detailsFragmentBinding!!.manufacturerCountry.text  = (response.body() as ServerResponse<Manufacturer>).results!![0].country
+                detailsFragmentBinding!!.manufacturerName.text  = (response.body() as ServerResponse<Manufacturer>).results[0].name
+                detailsFragmentBinding!!.manufacturerCountry.text  = (response.body() as ServerResponse<Manufacturer>).results[0].country
             }
         })
     }

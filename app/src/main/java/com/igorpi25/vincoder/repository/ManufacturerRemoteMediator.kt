@@ -27,33 +27,20 @@ class ManufacturerRemoteMediator(
         state: PagingState<Int, Manufacturer>
     ): MediatorResult {
         return try {
-            // The network load method takes an optional String
-            // parameter. For every page after the first, pass the String
-            // token returned from the previous page to let it continue
-            // from where it left off. For REFRESH, pass null to load the
-            // first page.
             val nextPageNumber : Int = when (loadType) {
                 LoadType.REFRESH -> null
-                // In this example, you never need to prepend, since REFRESH
-                // will always load the first page in the list. Immediately
-                // return, reporting end of pagination.
                 LoadType.PREPEND -> return MediatorResult.Success(
                     endOfPaginationReached = true
                 )
-                // Next page number
                 LoadType.APPEND -> {
-                    state.lastItemOrNull()?.page?.let { it + 1 } ?: null
+                    state.lastItemOrNull()?.page?.plus(1)
                 }
             }?:1
 
-            // Suspending network load via Retrofit. This doesn't need to
-            // be wrapped in a withContext(Dispatcher.IO) { ... } block
-            // since Retrofit's Coroutine CallAdapter dispatches on a
-            // worker thread.
             val response =
                 retrofitService.getAllManufacturers(page = nextPageNumber).await()
 
-            response.results?.takeIf { it.isNotEmpty() }?.map {it.apply { page = nextPageNumber }}?.let {
+            response.results.takeIf { it.isNotEmpty() }?.map {it.apply { page = nextPageNumber }}?.let {
                 database.withTransaction {
                     if (loadType == LoadType.REFRESH) {
                         manufacturerDao.clearAll()
@@ -64,7 +51,7 @@ class ManufacturerRemoteMediator(
             }
 
             MediatorResult.Success(
-                endOfPaginationReached = response.count?.equals(0)?:false
+                endOfPaginationReached = response.count > 0
             )
         } catch (e: IOException) {
             MediatorResult.Error(e)

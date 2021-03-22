@@ -3,22 +3,22 @@ package com.igorpi25.vincoder.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 
 @Entity
 data class Manufacturer(
     @PrimaryKey
-    @SerializedName("Mfr_ID")
-    var id: Int? = null,
+    @field:Json(name = "Mfr_ID")
+    val id: Int,
 
     @ColumnInfo(name = "name")
-    @SerializedName("Mfr_Name")
-    var name: String? = null,
+    @field:Json(name = "Mfr_Name")
+    val name: String,
 
     @ColumnInfo(name = "country")
-    @SerializedName("Country")
-    var country: String? = null,
+    @field:Json(name = "Country")
+    val country: String,
 
     @ColumnInfo(name = "page")
-    var page: Int? = null
+    var page: Int = 0
 )

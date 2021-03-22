@@ -42,7 +42,7 @@ class MainViewModel : ViewModel() {
             }else if(after == null || before == null) {
                 null
             }else if ( before.manufacturer.page != after.manufacturer.page) {
-                UiModel.SeparatorItem (after.manufacturer.page?:0)
+                UiModel.SeparatorItem (after.manufacturer.page)
             } else {
                 null
             }
