@@ -2,10 +2,13 @@ package com.igorpi25.vincoder.ui.main
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.igorpi25.vincoder.R
 import com.igorpi25.vincoder.databinding.MainFragmentBinding
@@ -27,9 +30,9 @@ class MainFragment : Fragment(R.layout.main_fragment) {
         val binding = MainFragmentBinding.bind(view)
         mainFragmentBinding = binding
 
-        binding.recyclerMovieList.setHasFixedSize(true)
+        binding.recyclerView.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(context)
-        binding.recyclerMovieList.layoutManager = layoutManager
+        binding.recyclerView.layoutManager = layoutManager
 
         adapter = ManufacturersPagingAdapter(
             ManufacturersComparator
@@ -38,9 +41,33 @@ class MainFragment : Fragment(R.layout.main_fragment) {
             findNavController().navigate(action)
         }
 
-        binding.recyclerMovieList.adapter = adapter.withLoadStateFooter(
+        binding.recyclerView.adapter = adapter.withLoadStateFooter(
             footer = ManufacturerLoadStateAdapter { adapter.retry() }
         )
+
+        binding.buttonRetry.setOnClickListener {
+            adapter.retry()
+        }
+
+        adapter.addLoadStateListener { loadState ->
+            if (loadState.mediator?.refresh is LoadState.Loading) {
+                binding.recyclerView.isVisible = false
+                binding.progressBar.isVisible = true
+                binding.errorLayout.isVisible = false
+
+            } else if (loadState.mediator?.refresh is LoadState.Error) {
+                binding.recyclerView.isVisible = false
+                binding.progressBar.isVisible = false
+                binding.errorLayout.isVisible = true
+
+                binding.errorMessage.text = (loadState.mediator?.refresh as LoadState.Error).error.message
+
+            } else {
+                binding.recyclerView.isVisible = true
+                binding.progressBar.isVisible = false
+                binding.errorLayout.isVisible = false
+            }
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

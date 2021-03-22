@@ -17,17 +17,20 @@ class ManufacturerLoadStateAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, loadState: LoadState): LoadStateViewHolder {
         val binding = ItemLoadstateLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return LoadStateViewHolder(binding, retry)
+        binding.buttonRetry.setOnClickListener {
+            retry.invoke()
+        }
+        return LoadStateViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: LoadStateViewHolder, loadState: LoadState) {
         holder.bind(loadState)
     }
 
-    class LoadStateViewHolder(binding: ItemLoadstateLayoutBinding, val retry: () -> Unit): RecyclerView.ViewHolder(binding.root){
-        val errorMessage: TextView = binding.errorMessage
-        val progressBar: ProgressBar = binding.progressBar
-        val buttonRetry: Button = binding.buttonRetry
+    class LoadStateViewHolder(binding: ItemLoadstateLayoutBinding): RecyclerView.ViewHolder(binding.root){
+        private val errorMessage: TextView = binding.errorMessage
+        private val progressBar: ProgressBar = binding.progressBar
+        private val buttonRetry: Button = binding.buttonRetry
 
         fun bind(loadState: LoadState) {
 
@@ -37,10 +40,6 @@ class ManufacturerLoadStateAdapter(
 
             if (loadState is LoadState.Error){
                 errorMessage.text = loadState.error.localizedMessage
-            }
-
-            buttonRetry.setOnClickListener {
-                retry.invoke()
             }
         }
     }

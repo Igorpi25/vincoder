@@ -32,7 +32,6 @@ class MainViewModel : ViewModel() {
         ),
         remoteMediator = ManufacturerRemoteMediator(database, retrofitService)
     ) {
-        // ManufacturersRoomPagingSource(database)
         manufacturerDao.getPagingSource()
     }.flow.map {
         pagingData -> pagingData.map { UiModel.ManufacturerItem(it) }
