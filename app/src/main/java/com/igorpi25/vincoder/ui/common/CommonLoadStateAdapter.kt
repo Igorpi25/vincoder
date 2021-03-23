@@ -1,4 +1,4 @@
-package com.igorpi25.vincoder.ui.main
+package com.igorpi25.vincoder.ui.common
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -9,26 +9,28 @@ import androidx.core.view.isVisible
 import androidx.paging.LoadState
 import androidx.paging.LoadStateAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.igorpi25.vincoder.databinding.ItemLoadstateLayoutBinding
+import com.igorpi25.vincoder.databinding.ItemLoadstateBinding
 
-class ManufacturerLoadStateAdapter(
+class CommonLoadStateAdapter(
     private val retry: () -> Unit
-) : LoadStateAdapter<ManufacturerLoadStateAdapter.LoadStateViewHolder>() {
+) : LoadStateAdapter<CommonLoadStateAdapter.LoadStateViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, loadState: LoadState): LoadStateViewHolder {
-        val binding = ItemLoadstateLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemLoadstateBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         binding.buttonRetry.setOnClickListener {
             retry.invoke()
         }
-        return LoadStateViewHolder(binding)
+        return LoadStateViewHolder(
+            binding
+        )
     }
 
     override fun onBindViewHolder(holder: LoadStateViewHolder, loadState: LoadState) {
         holder.bind(loadState)
     }
 
-    class LoadStateViewHolder(binding: ItemLoadstateLayoutBinding): RecyclerView.ViewHolder(binding.root){
-        private val errorMessage: TextView = binding.errorMessage
+    class LoadStateViewHolder(binding: ItemLoadstateBinding): RecyclerView.ViewHolder(binding.root){
+        private val errorMessage: TextView = binding.textError
         private val progressBar: ProgressBar = binding.progressBar
         private val buttonRetry: Button = binding.buttonRetry
 

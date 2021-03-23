@@ -28,7 +28,10 @@ class ManufacturerRemoteMediator(
     ): MediatorResult {
         return try {
             val nextPageNumber : Int = when (loadType) {
-                LoadType.REFRESH -> null
+                LoadType.REFRESH -> {
+                    Log.e("Igor", "ManufacturerRemoteMediator load LoadType.REFRESH loadType=")
+                    null
+                }
                 LoadType.PREPEND -> return MediatorResult.Success(
                     endOfPaginationReached = true
                 )

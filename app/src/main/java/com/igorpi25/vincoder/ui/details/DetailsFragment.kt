@@ -2,34 +2,34 @@ package com.igorpi25.vincoder.ui.details
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import androidx.paging.LoadState
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.igorpi25.vincoder.R
-import com.igorpi25.vincoder.databinding.DetailsFragmentBinding
-import com.igorpi25.vincoder.db.AppDatabase
-import com.igorpi25.vincoder.retrofit.RetrofitService
-import com.igorpi25.vincoder.model.Manufacturer
-import com.igorpi25.vincoder.model.ServerResponse
+import com.igorpi25.vincoder.databinding.ListFragmentBinding
+import com.igorpi25.vincoder.ui.common.CommonLoadStateAdapter
+import com.igorpi25.vincoder.ui.common.CommonPagingAdapter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import toothpick.Toothpick
-import javax.inject.Inject
 
 
-class DetailsFragment : Fragment(R.layout.details_fragment) {
+class DetailsFragment : Fragment(R.layout.list_fragment) {
 
     val args: DetailsFragmentArgs by navArgs()
 
-    private var detailsFragmentBinding: DetailsFragmentBinding? = null
+    private var detailsFragmentBinding: ListFragmentBinding? = null
 
-    @Inject
-    lateinit var mService: RetrofitService
+    lateinit var viewModel: DetailsViewModel
 
-    @Inject
-    lateinit var db: AppDatabase
+    lateinit var layoutManager: LinearLayoutManager
+    lateinit var adapter: CommonPagingAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -37,26 +37,63 @@ class DetailsFragment : Fragment(R.layout.details_fragment) {
         val scope = Toothpick.openScopes("AppScope")
         Toothpick.inject(this, scope)
 
-        val binding = DetailsFragmentBinding.bind(view)
+        val binding = ListFragmentBinding.bind(view)
         detailsFragmentBinding = binding
 
-        binding.manufacturerId.text = args.manufacturerId.toString()
+        binding.recyclerView.setHasFixedSize(true)
+        layoutManager = LinearLayoutManager(context)
+        binding.recyclerView.layoutManager = layoutManager
 
-        getManufacturerDetails()
+        adapter = CommonPagingAdapter(
+            ModelsComparator
+        ) {
+            Toast.makeText(context, "Id=" + it?.toString(), Toast.LENGTH_LONG).show()
+        }
 
-        binding.buttonSave.setOnClickListener {
-            lifecycleScope.launch {
-                val manufacturerDao = db.manufacturerDao()
-                manufacturerDao.insertAll(
-                    Manufacturer(
-                        args.manufacturerId,
-                        binding.manufacturerName.text.toString(),
-                        binding.manufacturerCountry.text.toString(),
-                        0
-                    )
-                )
+        binding.recyclerView.adapter = adapter.withLoadStateFooter(
+            footer = CommonLoadStateAdapter { adapter.retry() }
+        )
+
+        binding.buttonRetry.setOnClickListener {
+            adapter.retry()
+        }
+
+        adapter.addLoadStateListener { loadState ->
+            if (loadState.mediator?.refresh is LoadState.Loading) {
+                binding.recyclerView.isVisible = false
+                binding.progressBar.isVisible = true
+                binding.errorLayout.isVisible = false
+
+            } else if (loadState.mediator?.refresh is LoadState.Error) {
+                binding.recyclerView.isVisible = false
+                binding.progressBar.isVisible = false
+                binding.errorLayout.isVisible = true
+
+                binding.textError.text = (loadState.mediator?.refresh as LoadState.Error).error.message
+
+            } else {
+                binding.recyclerView.isVisible = true
+                binding.progressBar.isVisible = false
+                binding.errorLayout.isVisible = false
             }
         }
+
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        viewModel = ViewModelProvider(
+            this,
+            DetailsViewModelFactory(targetManufacturerId = args.manufacturerId)
+        ).get(DetailsViewModel::class.java)
+
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            viewModel.flow.collectLatest { pagingData ->
+                adapter.submitData(pagingData)
+            }
+        }
+
     }
 
     override fun onDestroyView() {
@@ -65,17 +102,5 @@ class DetailsFragment : Fragment(R.layout.details_fragment) {
         super.onDestroyView()
     }
 
-    private fun getManufacturerDetails() {
-        mService.getManufacturerDetails(id = args.manufacturerId).enqueue(object :
-            Callback<ServerResponse<Manufacturer>> {
-            override fun onFailure(call: Call<ServerResponse<Manufacturer>>, t: Throwable) {
 
-            }
-
-            override fun onResponse(call: Call<ServerResponse<Manufacturer>>, response: Response<ServerResponse<Manufacturer>>) {
-                detailsFragmentBinding!!.manufacturerName.text  = (response.body() as ServerResponse<Manufacturer>).results[0].name
-                detailsFragmentBinding!!.manufacturerCountry.text  = (response.body() as ServerResponse<Manufacturer>).results[0].country
-            }
-        })
-    }
 }

@@ -2,7 +2,6 @@ package com.igorpi25.vincoder.ui.main
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.core.view.isVisible
@@ -11,30 +10,32 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.igorpi25.vincoder.R
-import com.igorpi25.vincoder.databinding.MainFragmentBinding
+import com.igorpi25.vincoder.databinding.ListFragmentBinding
+import com.igorpi25.vincoder.ui.common.CommonLoadStateAdapter
+import com.igorpi25.vincoder.ui.common.CommonPagingAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class MainFragment : Fragment(R.layout.main_fragment) {
+class MainFragment : Fragment(R.layout.list_fragment) {
 
-    private var mainFragmentBinding: MainFragmentBinding? = null
+    private var mainFragmentBinding: ListFragmentBinding? = null
 
     lateinit var viewModel: MainViewModel
 
     lateinit var layoutManager: LinearLayoutManager
-    lateinit var adapter: ManufacturersPagingAdapter
+    lateinit var adapter: CommonPagingAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val binding = MainFragmentBinding.bind(view)
+        val binding = ListFragmentBinding.bind(view)
         mainFragmentBinding = binding
 
         binding.recyclerView.setHasFixedSize(true)
         layoutManager = LinearLayoutManager(context)
         binding.recyclerView.layoutManager = layoutManager
 
-        adapter = ManufacturersPagingAdapter(
+        adapter = CommonPagingAdapter(
             ManufacturersComparator
         ) {
             val action = MainFragmentDirections.actionMainToDetails(it!!)
@@ -42,7 +43,7 @@ class MainFragment : Fragment(R.layout.main_fragment) {
         }
 
         binding.recyclerView.adapter = adapter.withLoadStateFooter(
-            footer = ManufacturerLoadStateAdapter { adapter.retry() }
+            footer = CommonLoadStateAdapter { adapter.retry() }
         )
 
         binding.buttonRetry.setOnClickListener {
@@ -60,7 +61,7 @@ class MainFragment : Fragment(R.layout.main_fragment) {
                 binding.progressBar.isVisible = false
                 binding.errorLayout.isVisible = true
 
-                binding.errorMessage.text = (loadState.mediator?.refresh as LoadState.Error).error.message
+                binding.textError.text = (loadState.mediator?.refresh as LoadState.Error).error.message
 
             } else {
                 binding.recyclerView.isVisible = true

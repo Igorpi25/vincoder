@@ -9,7 +9,7 @@
         android:id="@+id/main"
         android:name="com.igorpi25.vincoder.ui.main.MainFragment"
         android:label="main_fragment"
-        tools:layout="@layout/main_fragment" >
+        tools:layout="@layout/list_fragment" >
         <action
             android:id="@+id/action_main_to_details"
             app:destination="@id/details" />

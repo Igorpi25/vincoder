@@ -1,17 +1,18 @@
-package com.igorpi25.vincoder.ui.main
+package com.igorpi25.vincoder.ui.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import com.igorpi25.vincoder.db.AppDatabase
-import com.igorpi25.vincoder.repository.ManufacturerRemoteMediator
+import com.igorpi25.vincoder.repository.ModelsRemoteMediator
 import com.igorpi25.vincoder.retrofit.RetrofitService
 import com.igorpi25.vincoder.ui.common.UiModel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import toothpick.Toothpick
 import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
+class DetailsViewModel (private val targetManufacturerId: Int) : ViewModel() {
 
     @Inject
     lateinit var retrofitService: RetrofitService
@@ -24,29 +25,34 @@ class MainViewModel : ViewModel() {
         Toothpick.inject(this, scope);
     }
 
+    val modelDao = database.modelDao()
     val manufacturerDao = database.manufacturerDao()
+
+    val manufacturerName = manufacturerDao.getManufacturer(targetManufacturerId)
 
     @OptIn(ExperimentalPagingApi::class)
     val flow = Pager(
         config = PagingConfig(
             pageSize = 100
         ),
-        remoteMediator = ManufacturerRemoteMediator(database, retrofitService)
+        remoteMediator = ModelsRemoteMediator(targetManufacturerId, database, retrofitService)
     ) {
-        manufacturerDao.getPagingSource()
+        modelDao.getPagingSource(targetManufacturerId)
     }.flow.map {
-        pagingData -> pagingData.map { UiModel.ManufacturerItem(it) }
+        pagingData -> pagingData.map { UiModel.ModelItem(it) }
     }.map {
-        it.insertSeparators<UiModel.ManufacturerItem, UiModel> { before, after ->
+        it.insertSeparators<UiModel.ModelItem, UiModel> { before, after ->
             if(after != null && before == null) {
-                UiModel.PageItem (1)
+                UiModel.MakeItem (after.model.makeName)
             }else if(after == null || before == null) {
                 null
-            }else if ( before.manufacturer.page != after.manufacturer.page) {
-                UiModel.PageItem (after.manufacturer.page)
+            }else if ( before.model.makeId != after.model.makeId) {
+                UiModel.MakeItem (after.model.makeName)
             } else {
                 null
             }
         }
+    }.combine(manufacturerName){
+            i, manufacturer -> i.insertHeaderItem(item = UiModel.ManufacturerItem(manufacturer))
     }.cachedIn(viewModelScope)
 }
