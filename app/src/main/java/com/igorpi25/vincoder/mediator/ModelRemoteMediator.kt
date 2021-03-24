@@ -1,4 +1,4 @@
-package com.igorpi25.vincoder.repository
+package com.igorpi25.vincoder.mediator
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
@@ -15,7 +15,7 @@ import retrofit2.await
 import java.io.IOException
 
 @OptIn(ExperimentalPagingApi::class)
-class ModelsRemoteMediator(
+class ModelRemoteMediator(
     private val targetManufacturer: Int,
     private val database: AppDatabase,
     private val retrofitService: RetrofitService

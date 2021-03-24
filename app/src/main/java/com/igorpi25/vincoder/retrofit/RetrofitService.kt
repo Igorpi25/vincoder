@@ -16,7 +16,4 @@ interface RetrofitService {
 
     @GET("vehicles/getmakeformanufacturer/{manufacturerId}")
     fun getMakesOfManufacturer(@Path("manufacturerId") manufacturerId: Int, @Query("format") format: String = "json"): Call<ServerResponse<Make>>
-
-    @GET("vehicles/getmanufacturerdetails/{id}")
-    fun getManufacturerDetails(@Path("id") id: Int, @Query("format") format: String = "json"): Call<ServerResponse<Manufacturer>>
 }

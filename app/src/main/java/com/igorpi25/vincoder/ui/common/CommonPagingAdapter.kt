@@ -117,7 +117,7 @@ class CommonPagingAdapter(
         private val text: TextView = binding.text
 
         fun bind(listItem: UiModel.PageItem) {
-            text.text = listItem.page.toString()
+            text.text = "["+listItem.page.toString()+"]"
         }
     }
 

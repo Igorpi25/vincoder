@@ -1,4 +1,4 @@
-package com.igorpi25.vincoder.repository
+package com.igorpi25.vincoder.mediator
 
 import android.util.Log
 import androidx.paging.ExperimentalPagingApi
@@ -45,16 +45,12 @@ class ManufacturerRemoteMediator(
 
             response.results.takeIf { it.isNotEmpty() }?.map {it.apply { page = nextPageNumber }}?.let {
                 database.withTransaction {
-                    if (loadType == LoadType.REFRESH) {
-                        manufacturerDao.clearAll()
-                    }
-
                     manufacturerDao.insertAll(*it.toTypedArray())
                 }
             }
 
             MediatorResult.Success(
-                endOfPaginationReached = response.count > 0
+                endOfPaginationReached = response.count == 0
             )
         } catch (e: IOException) {
             MediatorResult.Error(e)
