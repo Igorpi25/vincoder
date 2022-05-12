@@ -113,3 +113,53 @@ https://en.wikipedia.org/wiki/Vehicle_identification_number
 
 </details>
 
+## Манифест
+В данной демке, автор не ставит целью строгое соблюдение рекомендации **Clean Architecture** и других архитектурных подходов.
+Целью является разложение всех задействованных компонентов отдельно взятой библиотеки [**Paging-3**](https://developer.android.com/topic/libraries/architecture/paging/v3-overview) на составные части. 
+Определение функций отдельно взятых частей, объяснение их природы (генезис), выявление связей. 
+
+>Перед вами личный конспект, заметки и наблюдения, которые я посчитал важным для понимания предмета
+
+## Компоненты из Paging-3
+
+### Pager
+> TO-DO Сущность живущая на UI слое. 
+
+### PagingData
+> TO-DO Только что полученный кусок данных
+
+### Mediator
+> TO-DO Из Ui мы дергаем эту штуку. Он в свою очередь дергает repository(gateway)
+
+### PagingSource
+> TO-DO Сомневаюсь, что понятие "постраничность"(Paging) должно сущнествовать на уровне Repository. Термин из мира UI перенесли на слой Repository. По-хорошему, репозиторий не знает ничего о "страницах", ему все равно. Для него cуществуют запросы с разными параметрами
+
+### PagingConfig
+> TO-DO Настройки определяющие характер работы Pager
+
+## Компоненты приложения
+
+## UiModel
+Единый формат моделей для `ViewHolder`, с которым умеет работать общий адаптер. Автор использует один и тот-же адаптер для всех фрагментов. Отличается только типы `ViewHolder`, в зависимости от полученных данных. Данные определеются на слое `ViewModel`
+Таким образом автор избегает создание нового адаптера для каждого фрагмента. 
+
+``` kotlin
+sealed class UiModel {
+    data class ManufacturerItem(val manufacturer: Manufacturer): UiModel()
+    data class ModelItem(val model: Model): UiModel()
+    data class PageItem(val page: Int): UiModel()
+    data class MakeItem(val name: String): UiModel()
+}
+```
+
+Общий адаптер лежит в папке `ui/common`
+
+## Converter
+Берет объекты уровня Domain и переделывает в объекты уровня UI:
+* Берет `Manufacturer` и превращает в `UiModel`
+* Берет `Model` и превращает в `UiModel`
+
+> Речь идет об `Flow<PagingData<Manufacturer>>` и `Flow<PagingData<Model>>`, которые превращаются в `Flow<PagingData<UiModel>>`
+
+
+
