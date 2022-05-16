@@ -19,7 +19,7 @@
         android:id="@+id/details"
         android:name="com.igorpi25.vincoder.ui.details.DetailsFragment"
         android:label="details_fragment"
-        tools:layout="@layout/details_fragment" >
+        tools:layout="@layout/list_fragment" >
         <argument
             android:name="manufacturerId"
             app:argType="integer" />
