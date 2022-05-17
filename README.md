@@ -235,7 +235,7 @@ override suspend fun load(loadType: LoadType, state: PagingState<Int, Model>): M
 
 `MediatorResult.Success` с параметром `endOfPagination` - это то, что мы возвращаем в контексте `load` функции. На данном слое, нет сомнений в том что мы вернем `Success`. Разница может быть лишь в том, является ли страница последней, т.е. `endOfPagination` вернем со значением `true` или `false`?
 
-**Третий слой.** Флаг `endOfPagination` зависит от типа операции: `REFRESH`, `PREPEND`, `APPEND`
+**Третий слой.** Флаг `endOfPagination` зависит от типа операции: `REFRESH`, `PREPEND`, `APPEND`. Внутри конструкции `when` мы можем либо прервать выполнение  `load`, либо обяза найти следующий `nextMakeId`
 
 ``` kt
 val nextMakeId : Int = when (loadType) {
@@ -252,7 +252,7 @@ val nextMakeId : Int = when (loadType) {
             }
 ```
 
-В целом, логика вызовов такая. Когда медиатор запускает `load`, нам нужно подгрузить список `Model`-ей для следующего `Make`. Вопрос в том, откуда мы возьмем id следующего `Make`? Механика медиатора нам его дать не может, мы должны сами об этом подумать
+В целом, логика вызовов такая. Когда медиатор запускает `load`, нам нужно подгрузить список `Model`-ей для следующего `Make`. Вопрос в том, откуда мы возьмем `nextMakeId` следующего `Make`? Механика медиатора нам его дать не может, мы должны сами об этом подумать
 
 **Проблема получения следующего Make**
 
@@ -279,10 +279,80 @@ database.withTransaction {
 
 Теперь имея `Make` мы можем получить следующий за ним `nextMakeID`.
 
-> TO-DO В демке. Мы не так просто и красиво получаем `Make`. Потому `PagingState` хранит внутри себя список `Model`, не подозревая про существование `Make`. Нам приходится получать `makeId` из `Model`, затем вытаскиваем этот `Make` из БД, чтобы получить следующий за ним `nextMakeId`. Не красиво получается. И совсем не надежно. Плохо пахнет однозначно 
+> TO-DO В демке, мы не так просто получаем `Make`, как может показаться(и, возможно, как следовало бы). `PagingState` хранит внутри себя список моделей (`Model`). Обратите внимание, что список хранит именно модели а не изделия. Хотя было бы естественно держать список изделий, внутри которых есть список моделей. Вместо этого, `PagingState` даже не подозревает про существование `Make`. Нам приходится получать `makeId` из объектов `Model`, затем делать запрос в БД, чтобы вытащить соотсветствующий `Make`, чтобы затем использовать его `nextMakeId`. Не красиво получается. И совсем не надежно. Плохо пахнет однозначно. Вытаскивать `makeId` из модели это хак. А лишний запрос к БД приводит ненужной асинхронности на пустом месте, где можно было бы избежать этого, тем самым создавая лишний риск `NullPointerException`
 
-**Четвертый слой. LoadType.REFRESH**
-> TO-DO
+**Четвертый слой. Кейс LoadType.REFRESH**
 
-**Четвертый слой. LoadType.APPEND**
-> TO-DO
+Этот вызов у нас выполняет две задачи:
+1. Загрузить список изделий `Make` для выбранного `Manufacturer`
+2. Найти `nextMakeId` (в данной кейсе это `firstMakeId`)
+
+```kt
+val firstMake = makeDao.getFirstMakeOfManufacturer(targetManufacturer)
+
+if (firstMake == null ) {
+    // Значит изделия и модели для выбранного `Manufacturer` еще ни разу не кэшировались в БД. Следовательно нужно скачать список изделий из API
+    val response = retrofitService.getMakesOfManufacturer(manufacturerId = targetManufacturer).await()
+    
+    // Что делаем со списком изделий?
+    if (response.results.isNotEmpty()) {
+        // Есть список изделий. Придаем списку свойства цепочки, как было описано выше
+        val makes = response.results
+        makes.zipWithNext{a, b ->  a.apply { nextId = b.id }}
+        database.withTransaction {
+            // Этот кусок рассмотрим далее
+            makeDao.insertAll(*makes.plusElement(response.results.last()).map { it.apply { it.manufacturerId = targetManufacturer } }.toTypedArray())
+        }
+        
+        // Будем качать модели для первого изделия
+        makes.first().id
+    } else {
+        // У производителя нет изделий. Значит нечего показать, и мы сразу можем посчитать, что достигли конца списка.
+        return MediatorResult.Success(
+            endOfPaginationReached = true
+        )
+    }
+
+} else {
+    firstMake.id
+}
+```
+
+Расмотрим этот кусок подробнее:
+```kt
+makeDao.insertAll(*
+    // В результате особенностей работы `zipWithNext`, последний элемент списка пропадает. Снова добавляем этот элемент в конец списка. `nextMakeId` для него будет `null`
+    makes.plusElement(response.results.last()).
+    // Добавляем ко всем изделиям 'manufacturerId'
+    map {it.apply { it.manufacturerId = targetManufacturer }}.
+    toTypedArray()
+)
+```
+
+
+**Четвертый слой. Кейс LoadType.APPEND**
+
+Найти `nextMakeId`, если такой существует. Иначе прервать `load`.
+
+**Пятый слой. Загрузка и сохранение в БД моделей для найденного `nextMakeId`**
+
+Если выполнение `load` дошло до этой точки, значит мы нашли необходимый `nextMakeId`. Cкачиваем модели из API, и сохраняем в БД:
+```kt
+
+val response = retrofitService.getModelsForMakeId(makeId = nextMakeId).await()
+
+response.results.
+  takeIf { it.isNotEmpty() }?.
+  // Если список не пустой. Записываем модели в БД
+  let {
+    database.withTransaction {
+        // Добавляем `manufacturerId` к моделям
+        modelDao.insertAll(*it.map { it.apply { it.manufacturerId = targetManufacturer } }.toTypedArray())
+    }
+  }
+
+// Завершаем `load` с соответсвующим `endOfPaginationReached`
+MediatorResult.Success(
+    endOfPaginationReached = response.results.size == 0
+)
+```
